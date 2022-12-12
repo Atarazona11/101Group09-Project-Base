@@ -1,37 +1,46 @@
+
 <html lang="en">
     <head>
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Group 9 section 101 Project -- Zain Zaidi & Alejandro Tarazona</title>
-        <link rel="stylesheet" href="style.css">
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Alejandro Tarazona's Labs for INST377</title>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+            integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+            crossorigin=""/>
+        <link rel="stylesheet" href="style.css" />
+        <!-- Make sure you put this AFTER Leaflet's CSS -->
+        <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+        integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
+        crossorigin=""></script>
     </head>
     <body>
         <div class="wrapper">
-            <header class="header">
-                <h1>Group 9 section 101 Project -- Zain Zaidi & Alejandro Tarazona</h1>
-            </header>
+            <header class="header"><h1>Alejandro Tarazona's INST377 Labs</h1></header>
             <div class="container">
                 <div class="left_section box">
                     <h2>Form Inputs</h2>   
                         <form action="/api" class="box main_form">
                         <div>
-                            <lable fro="resto">Spotify Songs</lable>
+                            <lable for="resto">Filter Restaurnat List</lable>
                             <input type="text" name="resto" id="resto">
-                        </div>
-                        <button type="submit">Submit</button>
+                        </div>    
+                        <button type="submit" id="get-resto">Change Restaurants</button>
+                        <div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>
                     </form>
                 </div>
                 <div class="right_section box">
-                    <h2>Spotify Songs</h2>
-                    <div class="box" id="restuarant_list">
-                        A List of Songs Based on Location
+                    <h2>Local Restuarnat Map</h2>
+                    <div id="map"></div>
+                    <div class="box" id="Restaurant_list">
+                        <!-- description box -->
+                        A List of local restaurants
                     </div>
                 </div>
             </div>
             <footer class="footer">
                 YOUR GITHUB ACCOUNT NAME 
-                <a href='https://github.com/Atarazona11/101Group09-Project-Base'>Group 9 section 101</a>
+                <a href='https://github.com/Atarazona11/INST377-Lab-Work'>Atarazona11</a>
             </footer>
         </div>
         <script src="./script.js"></script>
