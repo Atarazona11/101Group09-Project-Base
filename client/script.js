@@ -93,81 +93,105 @@ function markerPlace(array, map) {
   });
 }
 
+function initChart(chart, object) {
+  const labels = Object.keys(object);
+  const info = Object.keys(object.map((item) => object[item].length));
+
+  const data = {
+    labels: labels,
+    datasets: [{
+      label: 'Restaurants By Category',
+      backgroundColor: 'rgb(255, 99, 132)',
+      borderColor: 'rgb(255, 99, 132)',
+      data: info
+    }]
+  };
+
+  const config = {
+    type: 'line',
+    data: data,
+    options: {}
+  };
+
+  return new Chart(
+    chart,
+    config
+  );
+}
+
+function shapeDataForLinceChart(array) {
+  return array.reduce((collection, item) => {
+    if(!collection[item.category]) {
+      collection[item.category] = [item]
+    } else{
+      collection[item.category].push(item);
+    }
+    return collection;
+  }, {})
+}
+
+async function getData() {
+  const url = 'https://data.princegeorgescountymd.gov/resource/umjn-t2iz.json'; // remote URL! you can test it in your browser
+  const data = await fetch(url); // We're using a library that mimics a browser 'fetch' for simplicity
+  const json = await data.json(); // the data isn't json until we access it using dot notation
+  const reply = json.filter((item) => Boolean(item.geocoded_column_1)).filter((item) => Boolean(item.name));
+  return reply;
+}
+
 async function mainEvent() {
   /*
         ## Main Event
-          Separating your main programming from your side functions will help you organize your thoughts
-          When you're not working in a heavily-commented "learning" file, this also is more legible
-          If you separate your work, when one piece is complete, you can save it and trust it
       */
-  const pageMap = initMap();
+  // const map = initMap();
 
   // the async keyword means we can make API requests
   const form = document.querySelector('.main_form'); // get your main form so you can do JS with it
-  const submit = document.querySelector('#get-resto'); // get a reference to your submit button
-  const loadAnimation = document.querySelector('.lds-ellipsis'); // get a reference to our loading animation
+  const submit = document.querySelector('#form_button'); // get a reference to your submit button
+  const loadAnimation = document.querySelector('.lds-ellipsis');
+  const restoName = document.querySelector('#resto');
+  const chartTarget = document.getElementById('#myChart');
   submit.style.display = 'none'; // let your submit button disappear
 
-  /*
-        Let's get some data from the API - it will take a second or two to load
-        This next line goes to the request for 'GET' in the file at /server/routes/foodServiceRoutes.js
-        It's at about line 27 - go have a look and see what we're retrieving and sending back.
-       */
-  const results = await fetch('/api/foodServicePG');
-  const arrayFromJson = await results.json(); // here is where we get the data from our request as JSON
-    
-  /*
-        Below this comment, we log out a table of all the results using "dot notation"
-        An alternate notation would be "bracket notation" - arrayFromJson["data"]
-        Dot notation is preferred in JS unless you have a good reason to use brackets
-        The 'data' key, which we set at line 38 in foodServiceRoutes.js, contains all 1,000 records we need
-      */
-  console.log('Test PG County Set');
-  console.table(arrayFromJson.data);
+  
+  const chartData = await getData();
+  const shapedData = shapeDataForLinceChart(chartData);
+  const myChart = initChart(chartTarget, shapedData);
+  /* API Data request */
 
-  // in your browser console, try expanding this object to see what fields are available to work with
-  // for example: arrayFromJson.data[0].name, etc
-  console.log(arrayFromJson.data[0]);
-    
-  // this is called "string interpolation" and is how we build large text blocks with variables
-  console.log(`${arrayFromJson.data[0].name} ${arrayFromJson.data[0].category}`);
-    
-  // This IF statement ensures we can't do anything if we don't have information yet
-  if (arrayFromJson.data?.length > 0) {
+
+  if (chartData.length > 0) {
     submit.style.display = 'block'; // let's turn the submit button back on by setting it to display as a block when we have data available
-    
-    // Let's hide the load button now that we have some data to manipulate
+
     loadAnimation.classList.remove('lds-ellipsis');
     loadAnimation.classList.add('lds-ellipsis_hidden');
   
-    let currentList = [];
-  
+    let currentArrray;
+    form.addEventListener('submit', async (submitEvent) => {
+      submitEvent.preventDefault();
+      currentList = processRestaurants(chartData);
+    
+
+      const restaurants = currentArray.filter((item) => Boolean(item.geocoded_column_1));
+      // And this function call will perform the "side effect" of injecting the HTML list for you
+      injectHTML(restaurants);
+      // markerPlace(currentList, pageMap);
+    });
+
     form.addEventListener('input', (event) => {
       console.log(event.target.value);
       const filteredList = filterList(currentList, event.target.value);
       injectHTML(filteredList);
-      markerPlace(filteredList, pageMap);
+      // markerPlace(filteredList, pageMap);
     });
   
     // And here's an eventListener! It's listening for a "submit" button specifically being clicked
     // this is a synchronous event event, because we already did our async request above, and waited for it to resolve
-    form.addEventListener('submit', (submitEvent) => {
-      // This is needed to stop our page from changing to a new URL even though it heard a GET request
-      submitEvent.preventDefault();
     
-      // This constant will have the value of your 15-restaurant collection when it processes
-      currentList = processRestaurants(arrayFromJson.data);
-    
-      // And this function call will perform the "side effect" of injecting the HTML list for you
-      injectHTML(currentList);
-      markerPlace(currentList, pageMap);
     
       // By separating the functions, we open the possibility of regenerating the list
       // without having to retrieve fresh data every time
       // We also have access to some form values, so we could filter the list based on name
-    });
   }
-}
 /*
       This last line actually runs first!
       It's calling the 'mainEvent' function at line 57
